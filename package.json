@@ -1,0 +1,35 @@
+{
+    "name": "indexed-set",
+    "homepage": "",
+    "version": "0.0.1-alpha",
+    "main": "indexed-set.js",
+    "description": "Set Manipulation for ordered sets",
+    "keywords": [
+        "sets",
+        "segmentation",
+        "analytics"
+    ],
+    "author": "Abbey Hawk Sparrow <@khrome> (http://patternweaver.com)",
+    "contributors": [],
+    "bugs": {
+        "url": "https://github.com/Protolus/protolus-combined/issues"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Protolus/protolus-combined.git"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+        "mocha": "*",
+        "should": "*",
+        "faker2": "*"
+    },
+    "optionalDependencies": {
+        "node-proxy": "*"
+    },
+    "engines": {
+        "node": "*"
+    }
+}
