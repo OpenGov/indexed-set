@@ -20,6 +20,7 @@ where keyName defaults to Mongo's '_id' or
     var collection = new Indexed.Collection(<options>);
     
 The available options are:
+
 1. datasource : the mongo adapter
 2. name : the name of the collection to load
 3. onLoad : executed when the collection load is complete
