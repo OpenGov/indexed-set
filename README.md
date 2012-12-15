@@ -89,6 +89,7 @@ Meaning you can either use strings to address by primary key or integers to addr
 Array Syntax
 ------------
 The Set class implements a number of the standard array syntax, for familiarity
+
 1. indexOf(object)
 2. forEach(iteratorFunction)
 3. push(object)
@@ -97,6 +98,7 @@ The Set class implements a number of the standard array syntax, for familiarity
 Set Functions
 -------------
 This is the meat of the library allowing you to manipulate and analyze datasets while still staying economical with memory and performance.
+
 1. and(set) : the union of all objects in both sets
 2. or(set) : all objects in either set
 3. xor(set) : all objects contained in one set, but not both
