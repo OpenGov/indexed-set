@@ -89,7 +89,7 @@ Meaning you can either use strings to address by primary key or integers to addr
 
 Array Syntax
 ------------
-The Set class implements a number of the standard array syntax, for familiarity
+The Set class implements a number of the standard array methods, for familiarity
 
 1. indexOf(object)
 2. forEach(iteratorFunction)

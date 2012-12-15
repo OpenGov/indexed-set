@@ -1,6 +1,6 @@
 {
     "name": "indexed-set",
-    "homepage": "",
+    "homepage": "https://github.com/DelphiSolutions/indexed-set",
     "version": "0.0.1-alpha",
     "main": "indexed-set.js",
     "description": "Set Manipulation for ordered sets",
@@ -12,12 +12,12 @@
     "author": "Abbey Hawk Sparrow <@khrome> (http://patternweaver.com)",
     "contributors": [],
     "bugs": {
-        "url": "https://github.com/Protolus/protolus-combined/issues"
+        "url": "https://github.com/DelphiSolutions/indexed-set/issues"
     },
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git://github.com/Protolus/protolus-combined.git"
+        "url": "git://github.com/DelphiSolutions/indexed-set.git"
     },
     "dependencies": {
     },
