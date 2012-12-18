@@ -20,6 +20,7 @@
         "url": "git://github.com/DelphiSolutions/indexed-set.git"
     },
     "dependencies": {
+        "prime": "*"
     },
     "devDependencies": {
         "mocha": "*",
@@ -27,7 +28,8 @@
         "faker2": "*"
     },
     "optionalDependencies": {
-        "node-proxy": "*"
+        "node-proxy": "*",
+        "mongojs": "*"
     },
     "engines": {
         "node": "*"

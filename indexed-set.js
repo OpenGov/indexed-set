@@ -7,11 +7,11 @@ IndexedSet.enableProxyWrapper = function(){
     var Proxy = require('node-proxy');
     // Proxies allow us to piggyback on javascript's array syntax
     SetForwardingHandler = function(obj) {
-      this.target = obj;
+        this.target = obj;
     }
     SetForwardingHandler.prototype = {
-      has: function(name) { return name in this.target; },
-      get: function(rcvr,name) {
+        has: function(name){ return name in this.target; },
+        get: function(rcvr, name){
             if( ((name || name === 0) && typeof name  == 'number') ){  //isNum?
                 return this.target.getByPosition(name);
             }
@@ -20,7 +20,7 @@ IndexedSet.enableProxyWrapper = function(){
             }
             return this.target[name];
         },
-      set: function(rcvr,name,val) {
+        set: function(rcvr, name, val){
             if( ((name || name === 0) && typeof name  == 'number') ){  //isNum?
                 if(typeof value  == 'string'){
                     return this.target.setByPositionFromString(name, val);
@@ -39,25 +39,25 @@ IndexedSet.enableProxyWrapper = function(){
             this.target[name] = val;
             return true;
         },
-      'delete': function(name) { return delete this.target[name]; },
-      enumerate: function() {
+        'delete': function(name){ return delete this.target[name]; },
+        enumerate: function(){
         var res = [];
         for(var key in this.target.ordering) res.push(key);
-        return res;
-      },
-      iterate: function() {
-        var props = this.enumerate(), i = 0;
-        return {
-          next: function() {
-            if (i === props.length) throw StopIteration;
-            return props[i++];
-          }
-        };
-      },
-      keys: function() { return Object.keys(this.target); },
+            return res;
+        },
+        iterate: function() {
+            var props = this.enumerate(), i = 0;
+            return {
+                next: function() {
+                    if (i === props.length) throw StopIteration;
+                    return props[i++];
+                }
+            };
+        },
+        keys: function() { return Object.keys(this.target); },
     };
     SetForwardingHandler.wrap = function(obj) {
-      return Proxy.create(new SetForwardingHandler(obj), Object.getPrototypeOf(obj));
+        return Proxy.create(new SetForwardingHandler(obj), Object.getPrototypeOf(obj));
     };
     IndexedSet.proxied = true;
     return IndexedSet;
@@ -73,26 +73,28 @@ IndexedSet.Set = function(parent, options){
     this.buffer = false;
     // 'data' can flush a selection (assuming it's not asynchronously connected)
     Object.defineProperty(this, 'data', {
-        get : function(){
+        get : fn.bind(function(){
+            //console.log('ttt', this.index);
             if(!this.buffer){
                 this.buffer = [];
-                this.ordering.forEach(function(id){
+                this.ordering.forEach(fn.bind(function(id){
+                    //console.log('psh', this.index[id], id, Object.keys(this.index).indexOf(id), Object.keys(this.index));
                     this.buffer.push(this.index[id]);
-                }.bind(this));
+                }, this));
             }
             return this.buffer;
-        }.bind(this),
-        set : function(value){
+        }, this),
+        set : fn.bind(function(value){
             throw('I pity the fool!')
-        }.bind(this)
+        }, this)
     });
     Object.defineProperty(this, 'length', {
-        get : function(){
+        get : fn.bind(function(){
             return this.ordering.length;
-        }.bind(this),
-        set : function(value){
+        }, this),
+        set : fn.bind(function(value){
             throw('Cannot set length property of a Set');
-        }.bind(this)
+        }, this)
     });
     
     if(IndexedSet.proxied) return SetForwardingHandler.wrap(this);
@@ -134,22 +136,25 @@ IndexedSet.Set.prototype = {
         }
     },
     _filterData : function(){
-        var fn = this.filterFunction();
+        var func = this.filterFunction();
         var results = [];
         try{
-            this.forEach(function(item, id){
-                if((fn.bind(item))()) results.push(item[this.primaryKey]);
-            }.bind(this));
+            var before = this.ordering.length;
+            var beforek = Object.keys(this.index).length;
+            this.forEach(fn.bind(function(item, id){
+                //console.log('PK', this.primaryKey, item[this.primaryKey]);
+                
+                if((fn.bind(func, item))()) results.push(item[this.primaryKey]);
+            }, this));
             this.ordering = results;
         }catch(ex){
-            console.log('EEEERRRR', fn.toString());
+            console.log('EEEERRRR', ex, fn.toString());
         }
     },
-    forEach : function(fn){
-        this.ordering.forEach(function(id, index){
-            //console.log('id', id, index);
-            (fn.bind(this.index[id]))(this.index[id], index);
-        }.bind(this));
+    forEach : function(func){
+        this.ordering.forEach(fn.bind(function(id, index){
+            (fn.bind(func, this.index[id]))(this.index[id], index);
+        }, this));
     },
     distinct : function(field){ //distinct(field) distinct() [object], or distinct(true) [object, strings only]
         var stringsMode = false;
@@ -207,7 +212,10 @@ IndexedSet.Set.prototype = {
         return this;
     },
     'with' : function(field, comparison, value){
-        if(!value){
+        /*if( (!comparison) && (!value) ){
+            return this.filter(new Function('return !!this[\''+field.replace('\\', '\\\\').replace('\'', '\\\'')+'\'];'));
+        } //*/
+        if(comparison && !value){
             value = comparison;
             comparison = '==='
         }
@@ -224,6 +232,9 @@ IndexedSet.Set.prototype = {
                 case 'array':
                     if(value.length == 0) throw('no fields error!');
                     body = 'return this[\''+field.replace('\\', '\\\\').replace('\'', '\\\'')+'\'] '+comparison+' \''+value.join(' || \'+this.\'+field+\' \'+comparison+\' \\\'')+'\';'; //todo: array_map escaping
+                    break;
+                case 'undefined':
+                    body = 'return !!this[\''+field.replace('\\', '\\\\').replace('\'', '\\\'')+'\'];';
                     break;
                 default : body = 'return this[\''+field.replace('\\', '\\\\').replace('\'', '\\\'')+'\'] '+comparison+' '+value+';';
             }
