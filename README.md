@@ -95,6 +95,8 @@ The Set class implements a number of the standard array methods, for familiarity
 2. forEach(iteratorFunction)
 3. push(object)
 4. pop()
+5. shift()
+6. slice(start, [stop]) : take a subset by index range
 
 Set Functions
 -------------

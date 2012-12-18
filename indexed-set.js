@@ -125,8 +125,20 @@ IndexedSet.Set.prototype = {
         var id = this.ordering.pop();
         if(this.index[id]) return this.index[id];
     },
+    shift : function(){
+        this.buffer = false;
+        var id = this.ordering.shift();
+        if(this.index[id]) return this.index[id];
+    },
     pause : function(){
         this.paused = true;
+    },
+    slice : function(start, stop){
+        var ob = new IndexedSet.Set(this.parent);
+        ob.index = this.index;
+        ob.filters = this.filters.slice(0);
+        ob.ordering = this.ordering.slice(start, stop);
+        return ob;
     },
     resume : function(){
         delete this.paused;
