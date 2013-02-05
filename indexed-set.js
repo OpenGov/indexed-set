@@ -134,10 +134,8 @@ IndexedSet.Set.prototype = {
         this.paused = true;
     },
     slice : function(start, stop){
-        var ob = new IndexedSet.Set(this.parent);
-        ob.index = this.index;
-        ob.filters = this.filters.slice(0);
-        ob.ordering = this.ordering.slice(start, stop);
+        var ob = this.clone();
+        ob.ordering = ob.ordering.slice(start, stop);
         return ob;
     },
     resume : function(){
@@ -151,8 +149,8 @@ IndexedSet.Set.prototype = {
         var func = this.filterFunction();
         var results = [];
         try{
-            var before = this.ordering.length;
-            var beforek = Object.keys(this.index).length;
+            //var before = this.ordering.length;
+            //var beforek = Object.keys(this.index).length;
             this.forEach(fn.bind(function(item, id){
                 //console.log('PK', this.primaryKey, item[this.primaryKey]);
                 
@@ -209,10 +207,12 @@ IndexedSet.Set.prototype = {
     clone : function(){
         var ob = new IndexedSet.Set(this.parent);
         ob.index = this.index;
-        ob.filters = this.filters.slice(0);
+        if(this.filters) ob.filters = this.filters.slice(0);
+        else ob.filters = [];
         ob.ordering = this.ordering.slice(0);
         return ob;
     },
+    //todo: both 'filter' and 'with' need some kind of callback or ready queue
     filter : function(fn, doFilter){
         if(!fn && !doFilter){
             this._filterData();

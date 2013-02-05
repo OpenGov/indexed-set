@@ -1,6 +1,6 @@
 var mongo = require('mongojs');
 
-var MongoAdaptor = function(options){
+var MongoAdaptor = function(options){ //todo: handle connection pass
     if(!options) options = {};
     if(typeof options === 'string') options = {database:options};
     if(!options.host) options.host = 'localhost';

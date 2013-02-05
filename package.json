@@ -20,7 +20,7 @@
         "url": "git://github.com/DelphiSolutions/indexed-set.git"
     },
     "dependencies": {
-        "prime": "*"
+        "prime": "0.0.5-alpha"
     },
     "devDependencies": {
         "mocha": "*",
