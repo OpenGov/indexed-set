@@ -74,11 +74,9 @@ IndexedSet.Set = function(parent, options){
     // 'data' can flush a selection (assuming it's not asynchronously connected)
     Object.defineProperty(this, 'data', {
         get : fn.bind(function(){
-            //console.log('ttt', this.index);
             if(!this.buffer){
                 this.buffer = [];
                 this.ordering.forEach(fn.bind(function(id){
-                    //console.log('psh', this.index[id], id, Object.keys(this.index).indexOf(id), Object.keys(this.index));
                     this.buffer.push(this.index[id]);
                 }, this));
             }
@@ -152,9 +150,8 @@ IndexedSet.Set.prototype = {
             //var before = this.ordering.length;
             //var beforek = Object.keys(this.index).length;
             this.forEach(fn.bind(function(item, id){
-                //console.log('PK', this.primaryKey, item[this.primaryKey]);
-                
-                if((fn.bind(func, item))()) results.push(item[this.primaryKey]);
+                var cond = (fn.bind(func, item))();
+                if(cond) results.push(item[this.primaryKey]);
             }, this));
             this.ordering = results;
         }catch(ex){
@@ -219,14 +216,16 @@ IndexedSet.Set.prototype = {
             return;
         }
         this.filters.push(fn);
-        if(doFilter !== false && !this.paused) this._filterData(); //todo: apply *only* the current filter
-        else if(this.paused) this.blockedFilter = true;
+        if(doFilter !== false && !this.paused){
+            this._filterData(); //todo: apply *only* the current filter
+        }else if(this.paused) this.blockedFilter = true;
         return this;
     },
-    'with' : function(field, comparison, value){
+    'with' : function(field, comparison, value, callback){
         /*if( (!comparison) && (!value) ){
             return this.filter(new Function('return !!this[\''+field.replace('\\', '\\\\').replace('\'', '\\\'')+'\'];'));
         } //*/
+        if(comparison == '=') comparison = '=='; //lulz
         if(comparison && !value){
             value = comparison;
             comparison = '==='
@@ -255,7 +254,10 @@ IndexedSet.Set.prototype = {
                 console.log('ERROR IN GENERATED SELECTOR', body) ;
                 throw ex;
         }
-        return this.filter(fn);
+        var result = this.filter(fn, true);
+        delete this.buffer;
+        if(callback) callback();
+        return result;
     },
     indexOf : function(item){
         var itemType = typeof item;
