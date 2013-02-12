@@ -1,6 +1,12 @@
 var type = require('prime/util/type');
 var array = require('prime/es5/array');
 var fn = require('prime/es5/function');
+array.erase = function(arr, field){
+    var index;
+    while((arr.indexOf(field)) != -1){ //get 'em all
+        arr.splice(index, 1); //delete the one we found
+    }
+};
 var IndexedSet = {};
 var SetForwardingHandler;
 IndexedSet.enableProxyWrapper = function(){
@@ -62,6 +68,33 @@ IndexedSet.enableProxyWrapper = function(){
     IndexedSet.proxied = true;
     return IndexedSet;
 };
+function recursiveHeirarchy(hierarchy, fields, scope, stack, result, stringsOnly){
+    if(!stack) stack = [];
+    if(!result) result = {};
+    var field = hierarchy.shift();
+    var possibleValues = scope.distinct(field, stringsOnly);
+    array.erase(fields, field);
+    if(!result[field]) result[field] = {};
+    if(stringsOnly){
+        fields.forEach(function(field, index){
+            if(type(scope[0][field]) != 'string') delete fields[index];
+        });
+    }
+    possibleValues.forEach(function(value){
+        if(!result[field][value]) result[field][value] = {};
+        stack.push(scope);
+        scope = scope.clone();
+        scope.with(field, value);
+        result[field][value]['_'] = {};
+        var distinct = scope.distinct();
+        fields.forEach(function(returnField){
+            result[field][value]['_'][returnField] = distinct[returnField];
+        });
+        if(hierarchy.length > 0) recursiveHeirarchy(hierarchy.slice(0), fields.slice(0), scope, stack, result[field][value], stringsOnly);
+        scope = stack.pop();
+    });
+    return result;
+}
 IndexedSet.Set = function(parent, options){
     if(parent && parent.index) this.index = parent.index;
     else this.index = {};
@@ -103,6 +136,9 @@ IndexedSet.arrayContains = function(array, item){
         if(array[index] === item) return true;
     }
     return false;
+};
+var escapeString = function(field){
+    return field.replace('\\', '\\\\').replace('\'', '\\\'');
 };
 IndexedSet.Set.prototype = {
     push : function(value){
@@ -177,7 +213,7 @@ IndexedSet.Set.prototype = {
                 if(values['*'].indexOf(this[id][field]) === -1) values['*'].push(this[id][field]);
             }else{
                 var keys = Object.keys(this[id]);
-                keys.each(function(key){
+                keys.forEach(function(key){
                     var val = this[id][key];
                     if(fields.indexOf(key) === -1) fields.push(key);
                     if(!values[key]) values[key] = [];
@@ -189,7 +225,7 @@ IndexedSet.Set.prototype = {
         else return values;
     },
     byGroup : function(fieldName){
-        results = {};
+        var results = {};
         //console.log(this[0], this[0][fieldName]);
         //return;
         var segment;
@@ -251,7 +287,8 @@ IndexedSet.Set.prototype = {
             }
             fn = new Function(body);
         }catch(ex){
-                console.log('ERROR IN GENERATED SELECTOR', body) ;
+                console.log('ERROR IN GENERATED SELECTOR', body);
+                console.log('?', field, comparison, value);
                 throw ex;
         }
         var result = this.filter(fn, true);
@@ -348,6 +385,33 @@ IndexedSet.Set.prototype = {
     setByPositionFromObject : function(position, value){
         if(!this.index[value[this.primaryKey]]) this.index[value[this.primaryKey]] = value;
         this.ordering[position] = value[this.primaryKey];
+    },
+    //todo: thread me
+    hierarchy : function(hierarchies, fields, discriminants, callback){
+        if( (!callback) && type(discriminants) == 'function'){
+            callback = discriminants;
+            discriminants = undefined;
+        }
+        if( (!callback) && (!discriminants) && type(fields) == 'function'){
+            callback = fields;
+            fields = undefined;
+        }
+        try{
+            var progenitor = this.clone();
+            if(discriminants) discriminants.forEach(function(discriminant){
+                progenitor.with(discriminant.field, discriminant.operator, discriminant.value);
+            });
+            if(!fields) fields = Object.keys(this[0]);
+            var result = {};
+            hierarchies.forEach(function(hierarchy){
+                var fieldsCopy = fields.slice(0);
+                recursiveHeirarchy(hierarchy, fieldsCopy, progenitor, [], result, true);
+            });
+        }catch(ex){
+            console.log('ERROR', ex, ex.stack);
+        }
+        if(callback) callback(result);
+        return result;
     },
 };
 IndexedSet.Collection = function(options, key){
