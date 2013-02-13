@@ -114,7 +114,8 @@ This is the meat of the library allowing you to manipulate and analyze datasets 
 10. resume() : allow filters to execute as they are applied (started by default), also executes queued filters
 11. pause() : queue applied filters instead of immediately executing them.
 12. filterFunction() : return a function which is a composite of all filter functions on this set(can be passed to mongo as a selector function).
-13. hierarchy(hierarchies, [fields]) : the tree of dependencies by node based on the descending relationships provided (an array of arrays of fieldNames). This produces overlapping relationship trees based on the passed priority. I won't go into further detail because this is a CPU bound task. If you don't know how to compensate for that, avoid the feature, lest you have unresponsive services.
+13. hierarchy(hierarchies, [fields]) : the tree of dependencies by node based on the descending relationships (provided an array of arrays of fieldNames). This produces overlapping relationship trees based on the passed priority. I won't go into further detail because this is a CPU bound task. If you don't know how to compensate for that, avoid the feature, lest you have unresponsive services.
+14. aggregate(field, [aggregatorFn]) : aggregate all set members on a given field, default aggregation is just a = a + b.
 
 Testing
 -------
