@@ -226,15 +226,17 @@ IndexedSet.Set.prototype = {
     },
     byGroup : function(fieldName){
         var results = {};
-        //console.log(this[0], this[0][fieldName]);
-        //return;
         var segment;
-        this.forEach(function(item){
-            segment = item[fieldName];
-            if(!results[segment]) results[segment] = new Hades.Set(item.parent);
-            results[segment].filters = item.filters;
-            results[segment].push(item);
-        }.bind(this));
+        try{
+            this.forEach(function(item){
+                segment = item[fieldName];
+                if(!results[segment]) results[segment] = new IndexedSet.Set(this.parent);
+                results[segment].filters = item.filters;
+                results[segment].push(item);
+            }.bind(this));
+        }catch(ex){
+            console.log('Error!', ex);
+        }
         return results;
     },
     clone : function(){
@@ -413,6 +415,20 @@ IndexedSet.Set.prototype = {
         if(callback) callback(result);
         return result;
     },
+    aggregate : function(field, aggregator){
+        var result;
+        if(!aggregator) aggregator = function(a, b){ return a + b; }
+        this.forEach(function(item){
+            var value = item[field]
+            if(type(value) == 'string'){
+                value = value.replace('\t', '').replace(' ', '').replace(',', '');
+                value = parseFloat(value);
+                value = value || 0.0;
+            }
+            result = aggregator(result || 0.0, value);
+        });
+        return result;
+    }
 };
 IndexedSet.Collection = function(options, key){
     this.primaryKey = options.primaryKey || key || '_id';

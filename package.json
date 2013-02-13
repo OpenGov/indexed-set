@@ -1,7 +1,7 @@
 {
     "name": "indexed-set",
     "homepage": "https://github.com/DelphiSolutions/indexed-set",
-    "version": "0.0.1-alpha",
+    "version": "0.0.2-alpha",
     "main": "indexed-set.js",
     "description": "Set Manipulation for ordered sets",
     "keywords": [
